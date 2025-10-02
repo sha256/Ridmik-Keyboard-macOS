@@ -12,6 +12,10 @@ Bangla input methods for macOS.
 - **Native macOS Integration**: Works system-wide in all applications
 - **Old style -kars**: Supports switching to old style kars (ে + ক => কে) in জাতীয় (Jatiyo)
 
+
+![Menu bar preview](preview.png)
+
+
 ## Installation
 
 ### Download and Install
