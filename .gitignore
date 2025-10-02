@@ -1,1 +1,36 @@
+# Xcode
+*.xcworkspace
+!default.xcworkspace
+*.xcuserdata
+*.xccheckout
+*.xcodeproj/xcuserdata
+*.moved-aside
+DerivedData/
+build/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+.env
+.claude
+
+CLAUDE.md
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Swift Package Manager
+/.build/
+build/
+release/
+Package.resolved
+
+# Xcode generated
+*.xcscmblueprint
+
+# Mac
 .DS_Store

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+    <title>Ridmik Keyboard</title>
+    <organization>com.ridmik</organization>
+    <domains enable_localSystem="false" enable_anywhere="false" enable_currentUserHome="true"/>
+    <options customize="never" require-scripts="true" rootVolumeOnly="false"/>
+
+    <welcome language="en" mime-type="text/plain"><![CDATA[
+Welcome to the Ridmik Keyboard Installer!
+
+This will install Ridmik Keyboard to your Mac.
+
+Ridmik Keyboard allows you to type in Bangla using various methods such as অভ্র, জাতীয়, সহজ, প্রভাত.
+    ]]></welcome>
+
+    <conclusion language="en" mime-type="text/plain"><![CDATA[
+Ridmik Keyboard has been installed successfully!
+
+Next steps:
+
+0. Logout from your Mac and log-in again.
+1. Open System Preferences/Settings
+2. Go to Keyboard → Input Sources → Edit
+3. Click '+' to add a new input source
+4. Click on "Bangla" from the left side panel
+5. It'll show অভ্র, জাতীয়, সহজ, প্রভাত options on the right side. Select your preferred writing method and add it
+7. Close this and open any text field.
+8. Switch to the preferred writing method from Mac system menu bar's language icon.
+9. Start typing in Bangla!
+
+You may need to restart applications for the input method to appear.
+    ]]></conclusion>
+
+    <pkg-ref id="com.ridmik.inputmethod.macos.pkg"/>
+
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.ridmik.inputmethod.macos.pkg"/>
+        </line>
+    </choices-outline>
+
+    <choice id="default"/>
+    <choice id="com.ridmik.inputmethod.macos.pkg" visible="false">
+        <pkg-ref id="com.ridmik.inputmethod.macos.pkg"/>
+    </choice>
+
+    <pkg-ref id="com.ridmik.inputmethod.macos.pkg" version="{{VERSION}}" onConclusion="none">
+        {{COMPONENT_PKG_NAME}}
+    </pkg-ref>
+</installer-gui-script>

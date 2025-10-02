@@ -1,0 +1,9 @@
+/* Input Method Names */
+"com.ridmik.inputmethod.macos.jatiyo" = "জাতীয়";
+"com.ridmik.inputmethod.macos.phonetic" = "অভ্র";
+"com.ridmik.inputmethod.macos.probhat" = "প্রভাত";
+"com.ridmik.inputmethod.macos.easy" = "সহজ";
+
+
+CFBundleName = "Ridmik Keyboard";
+CFBundleDisplayName = "Ridmik Keyboard";
