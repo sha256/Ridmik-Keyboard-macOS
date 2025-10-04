@@ -5,19 +5,21 @@ class InputMethodController: IMKInputController {
     
     private var inputMethod: InputMethodProtocol!
     private var inputText: String = ""
-    private var currentInputSourceID: String = ""
+    private static var currentInputSourceID: String = ""
+    private var notificationObserver: NSObjectProtocol?
     
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         super.init(server: server, delegate: delegate, client: inputClient)
         
         updateInputMethodIfNeeded()
         
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(inputMethodChanged(_:)),
-            name: NSTextInputContext.keyboardSelectionDidChangeNotification,
-            object: nil
-        )
+        notificationObserver = NotificationCenter.default.addObserver(
+            forName: NSTextInputContext.keyboardSelectionDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            self?.updateInputMethodIfNeeded()
+        }
     }
     
     override func activateServer(_ sender: Any!) {
@@ -168,7 +170,6 @@ class InputMethodController: IMKInputController {
         return char >= "0" && char <= "9"
     }
     
-    
     private func toBanglaDigit(_ char: Character) -> String {
         if let scalar = char.unicodeScalars.first, scalar.value >= 48 && scalar.value <= 57 { // '0'–'9'
             let banglaScalarValue = 0x09E6 + (scalar.value - 0x30) // ০ + offset
@@ -188,18 +189,14 @@ class InputMethodController: IMKInputController {
         return ""
     }
     
-    @objc func inputMethodChanged(_ notification: Notification) {
-        updateInputMethodIfNeeded()
-    }
-    
     private func updateInputMethodIfNeeded() {
         let sourceID = getCurrentInputMethodId()
         
         // Don't reinitialize if the source hasn't changed
-        if sourceID == currentInputSourceID {
+        if sourceID == InputMethodController.currentInputSourceID {
             return
         }
-        
+
         // Only handle our defined input methods
         let newInputMethod: InputMethodProtocol?
         switch sourceID {
@@ -219,12 +216,12 @@ class InputMethodController: IMKInputController {
         
         if let newInputMethod = newInputMethod {
             inputMethod = newInputMethod
-            currentInputSourceID = sourceID
+            InputMethodController.currentInputSourceID = sourceID
             NSLog("⌨️ Switched to input method: \(sourceID)")
         } else if (inputMethod == nil) {
             // default value
             inputMethod = PhoneticInputMethod()
-            currentInputSourceID = "com.ridmik.inputmethod.macos.phonetic"
+            InputMethodController.currentInputSourceID = "com.ridmik.inputmethod.macos.phonetic"
         }
     }
     
@@ -240,7 +237,7 @@ class InputMethodController: IMKInputController {
         versionMenuItem.isEnabled = false
         menu.addItem(versionMenuItem)
 
-        let copyrightMenuItem = NSMenuItem(title: "© 2014-Present Ridmik Labs", action: nil, keyEquivalent: "")
+        let copyrightMenuItem = NSMenuItem(title: "© 2014-Present, Ridmik Labs", action: nil, keyEquivalent: "")
         copyrightMenuItem.isEnabled = false
         menu.addItem(copyrightMenuItem)
 
@@ -254,14 +251,19 @@ class InputMethodController: IMKInputController {
         }
         inputMethod.handleMenuAction(menuItem)
     }
-    
-    
+
     override func recognizedEvents(_ sender: Any!) -> Int {
         let mask: NSEvent.EventTypeMask = [
             .keyDown,
             .flagsChanged
         ]
         return Int(mask.rawValue)
+    }
+    
+    deinit {
+        if let notificationObserver = notificationObserver {
+            NotificationCenter.default.removeObserver(notificationObserver)
+        }
     }
     
 }
