@@ -13,13 +13,6 @@ class InputMethodController: IMKInputController {
         
         updateInputMethodIfNeeded()
         
-        notificationObserver = NotificationCenter.default.addObserver(
-            forName: NSTextInputContext.keyboardSelectionDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            self?.updateInputMethodIfNeeded()
-        }
     }
     
     override func activateServer(_ sender: Any!) {
@@ -28,6 +21,9 @@ class InputMethodController: IMKInputController {
     }
     
     private func toBangla(word: String) -> String {
+        guard let inputMethod = inputMethod else {
+            return word
+        }
         return inputMethod.toBangla(word: word)
     }
     
@@ -87,19 +83,20 @@ class InputMethodController: IMKInputController {
     }
     
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
+        //NSLog("🔥 \(Unmanaged.passUnretained(self).toOpaque()): handle event: \(event), lang: \(inputMethod?.mappingFileName ?? "unknown")")
         
-        if event.type != .keyDown {
-            return false
-        }
+        updateInputMethodIfNeeded()
+        
+        // NSLog("🔥 input method: \(self.inputMethod)")
         
         let modifiers = event.modifierFlags
-        let key = event.characters ?? ""
-        let keyCode = event.keyCode
         
-        // Let system shortcuts pass through (Command+A, Command+C, Command+V, etc.)
-        if modifiers.contains(.command) {
+        if event.type != .keyDown || inputMethod == nil || modifiers.contains(.command) {
             return false
         }
+        
+        let key = event.characters ?? ""
+        let keyCode = event.keyCode
         
         // Handle backspace
         if keyCode == 51 {
@@ -145,6 +142,7 @@ class InputMethodController: IMKInputController {
         
         inputText += key
         updateComposingText()
+        // NSLog("🔥 End of handle event: \(event), lang: \(inputMethod?.mappingFileName ?? "unknown")")
         return true
     }
     
@@ -192,8 +190,10 @@ class InputMethodController: IMKInputController {
     private func updateInputMethodIfNeeded() {
         let sourceID = getCurrentInputMethodId()
         
+        // NSLog("⌨️ IM from service: \(sourceID), IM using: \(InputMethodController.currentInputSourceID)")
+        
         // Don't reinitialize if the source hasn't changed
-        if sourceID == InputMethodController.currentInputSourceID {
+        if sourceID == InputMethodController.currentInputSourceID && inputMethod != nil  {
             return
         }
 
@@ -217,7 +217,8 @@ class InputMethodController: IMKInputController {
         if let newInputMethod = newInputMethod {
             inputMethod = newInputMethod
             InputMethodController.currentInputSourceID = sourceID
-            NSLog("⌨️ Switched to input method: \(sourceID)")
+            // NSLog("⌨️ 🔥 \(Unmanaged.passUnretained(self).toOpaque()): Switched to input method: \(sourceID)")
+            commitComposingText()
         } else if (inputMethod == nil) {
             // default value
             inputMethod = PhoneticInputMethod()
@@ -226,6 +227,10 @@ class InputMethodController: IMKInputController {
     }
     
     override func menu() -> NSMenu! {
+        guard let inputMethod = inputMethod else {
+            return NSMenu()
+        }
+        
         let menu = inputMethod.createMenu() ?? NSMenu()
 
         if menu.numberOfItems > 0 {

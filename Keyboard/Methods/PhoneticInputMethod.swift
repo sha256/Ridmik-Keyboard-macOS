@@ -28,9 +28,16 @@ class PhoneticInputMethod: InputMethodProtocol {
     func toBangla(word: String) -> String {
         var result = ""
         var i = 0
-        let wordArray = Array(word)
+        var wordArray = Array(word)
         let length = wordArray.count
         var canPossiblyJoin = false
+        
+        for i in 0..<wordArray.count {
+            let now = wordArray[i]
+            if ["A", "B", "C", "E", "F", "P", "X", "K", "L", "M", "V", "Y", "W", "Q"].contains(now) {
+                wordArray[i] = Character(now.lowercased())
+            }
+        }
 
         while i < length {
             let maxJ = min(maxMappingWordSize, length - i)
